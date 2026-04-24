@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Engineer // Rudra Dudhat</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4fa;
+    --surface: #ffffff;
+    --surface-2: #e8eef8;
+    --border: #c8d4e8;
+    --border-soft: #dde6f4;
+    --blue-dark: #1a3a6b;
+    --blue-mid: #2d5fa8;
+    --blue-accent: #4a7fd4;
+    --blue-light: #d0dff5;
+    --terminal-bg: #0d1b2e;
+    --terminal-text: #7ab3f0;
+    --terminal-prompt: #f0a500;
+    --text-primary: #0f1e35;
+    --text-secondary: #3d5a80;
+    --text-muted: #6b86a8;
+    --code-bg: #e2ecf8;
+    --code-text: #1a3a6b;
+    --tag-bg: #dbeafe;
+    --tag-text: #1e40af;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  .email-wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(26,58,107,0.12), 0 1px 4px rgba(26,58,107,0.08);
+    border: 1px solid var(--border);
+  }
+
+  /* Terminal header */
+  .terminal-bar {
+    background: var(--terminal-bg);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--terminal-text);
+    letter-spacing: 0.02em;
+  }
+
+  .terminal-dots {
+    display: flex;
+    gap: 6px;
+    margin-right: 4px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .dot-red { background: #ff5f57; }
+  .dot-yellow { background: #febc2e; }
+  .dot-green { background: #28c840; }
+
+  .terminal-prompt-text {
+    color: var(--terminal-prompt);
+    font-weight: 700;
+  }
+
+  .terminal-cmd {
+    color: var(--terminal-text);
+  }
+
+  .terminal-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: var(--terminal-text);
+    animation: blink 1.2s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Meta row */
+  .meta-row {
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border-soft);
+    padding: 12px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .meta-row .meta-line {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    gap: 8px;
+  }
+
+  .meta-row .meta-line .meta-key {
+    color: var(--blue-mid);
+    font-weight: 500;
+    min-width: 28px;
+  }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #c8daf8 0%, #dbeafe 40%, #e8f0ff 100%);
+    padding: 40px 36px 32px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(74,127,212,0.15) 0%, transparent 70%);
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--blue-mid);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin-bottom: 16px;
+  }
+
+  .hero-tag::before {
+    content: '⬤';
+    font-size: 7px;
+    color: #28c840;
+  }
+
+  .hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    line-height: 1.15;
+    color: var(--blue-dark);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+
+  .hero-subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* Body content */
+  .body-content {
+    padding: 0 36px 36px;
+  }
+
+  /* Section headers */
+  .section-comment {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 24px 0 10px;
+  }
+
+  /* Opening hook */
+  .hook-block {
+    background: var(--code-bg);
+    border-left: 3px solid var(--blue-accent);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+  }
+
+  .hook-block p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .hook-block .hook-code {
+    display: inline;
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(26,58,107,0.08);
+    color: var(--code-text);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* Project card — main feature */
+  .project-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .project-card-header {
+    background: var(--terminal-bg);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .project-card-header .project-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: #7ab3f0;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .project-card-header .project-install {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--terminal-prompt);
+    background: rgba(240,165,0,0.1);
+    border: 1px solid rgba(240,165,0,0.3);
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+
+  .project-card-body {
+    padding: 18px;
+    background: var(--surface);
+  }
+
+  .project-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+
+  .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .feature-icon {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--blue-accent);
+    font-weight: 700;
+    min-width: 22px;
+    padding-top: 2px;
+  }
+
+  .reason-callout {
+    background: linear-gradient(135deg, var(--blue-light), #e8f0ff);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--blue-dark);
+    line-height: 1.6;
+    font-style: italic;
+    margin-top: 12px;
+  }
+
+  /* Second project */
+  .secondary-project {
+    background: var(--surface-2);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+
+  .secondary-project .sp-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .sp-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .sp-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue-dark);
+  }
+
+  .sp-body {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.65;
+  }
+
+  .sp-insight {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* Divider */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border-soft);
+    margin: 4px 0;
+  }
+
+  /* About row */
+  .about-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 0 4px;
+  }
+
+  .about-badge {
+    background: var(--blue-dark);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+  }
+
+  .about-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* Quote block */
+  .quote-block {
+    border-left: 3px solid var(--terminal-prompt);
+    padding: 14px 18px;
+    margin: 20px 0;
+    background: rgba(240,165,0,0.04);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .quote-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    color: var(--blue-dark);
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  .quote-attribution {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Closing */
+  .closing-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    padding: 16px 0 4px;
+  }
+
+  /* Links footer */
+  .footer {
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    padding: 20px 36px;
+  }
+
+  .footer-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .links-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .link-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--blue-mid);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: all 0.15s ease;
+  }
+
+  .link-chip:hover {
+    background: var(--blue-light);
+    border-color: var(--blue-accent);
+    color: var(--blue-dark);
+  }
+
+  .link-icon {
+    font-size: 12px;
+  }
+
+  .sender-row {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sender-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--blue-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 14px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .sender-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .sender-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue-dark);
+  }
+
+  .sender-handle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="email-wrapper">
+
+  <!-- Terminal bar -->
+  <div class="terminal-bar">
+    <div class="terminal-dots">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+    </div>
+    <span class="terminal-prompt-text">rudra@builds</span>
+    <span class="terminal-cmd">:~$ ./send_email.sh --to hello@nexo.money --subject "prompt_engineer"</span>
+    <span class="terminal-cursor"></span>
+  </div>
+
+  <!-- Email meta -->
+  <div class="meta-row">
+    <div class="meta-line"><span class="meta-key">to</span> hello@nexo.money</div>
+    <div class="meta-line"><span class="meta-key">re</span> Prompt Engineer // Rudra Dudhat</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-tag">INCOMING · APRIL 2025</div>
+    <div class="hero-title">Prompt Engineer<br>// Rudra Dudhat</div>
+    <div class="hero-subtitle">IIT Bhilai · B.Tech DS&AI · Builder in Public</div>
+  </div>
+
+  <!-- Body -->
+  <div class="body-content">
+
+    <div class="section-comment">// opening_hook</div>
+
+    <div class="hook-block">
+      <p>
+        Your post said "forget the resume, send us the most impressive thing you've built."<br><br>
+        So here it is: <span class="hook-code">pip install diffprompt</span>
+      </p>
+    </div>
+
+    <!-- Main project -->
+    <div class="section-comment">// flagship_project</div>
+
+    <div class="project-card">
+      <div class="project-card-header">
+        <span class="project-name">diffprompt</span>
+        <span class="project-install">$ pip install diffprompt</span>
+      </div>
+      <div class="project-card-body">
+        <p class="project-desc">
+          An open-source Python library for behavioral prompt regression testing. Point it at two prompt versions — it handles the rest.
+        </p>
+        <div class="feature-list">
+          <div class="feature-item"><span class="feature-icon">//</span> Generates test cases automatically from prompt structure</div>
+          <div class="feature-item"><span class="feature-icon">//</span> Runs both versions and judges outputs using a cascade of LLM evaluators</div>
+          <div class="feature-item"><span class="feature-icon">//</span> Clusters failures by pattern using HDBSCAN</div>
+          <div class="feature-item"><span class="feature-icon">//</span> Produces an HTML report showing exactly where behavior drifted and why</div>
+        </div>
+        <div class="reason-callout">
+          Built it because when money is on the line, "it looks fine" is not good enough. You need to know precisely what changed before it ships.
+        </div>
+      </div>
+    </div>
+
+    <!-- Second project -->
+    <div class="section-comment">// also_shipped</div>
+
+    <div class="secondary-project">
+      <div class="sp-header">
+        <span class="sp-tag">LANGGRAPH</span>
+        <span class="sp-title">Personal Outreach Engine</span>
+      </div>
+      <p class="sp-body">
+        Drafts emails, waits for human approval, then sends. The human stays in the loop on purpose.
+      </p>
+      <p class="sp-insight">
+        The right question before shipping any agentic system: "what happens when it's wrong?" In fintech, that question isn't optional.
+      </p>
+    </div>
+
+    <div class="secondary-project" style="margin-top: 12px;">
+      <div class="sp-header">
+        <span class="sp-tag" style="background:#dcfce7;color:#166534;">ML · TRADING</span>
+        <span class="sp-title">OptiQuant</span>
+      </div>
+      <p class="sp-body">
+        Ensemble ML trading system — LightGBM + CatBoost with SHAP explainability, deployed on AWS EC2 with Docker and CI/CD. Backtested to 28.16% CAGR and 1.05 Sharpe ratio.
+      </p>
+      <p class="sp-insight">
+        Built explainability in from the start — not as an afterthought. If the model can't show its reasoning, it doesn't ship.
+      </p>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- About -->
+    <div class="section-comment">// about_me</div>
+
+    <div class="about-row">
+      <div class="about-badge">IIT Bhilai · 9.48</div>
+      <div class="about-text">
+        2nd year, Data Science & AI. Building with Claude Code and LangGraph as the main way I work — not as a hobby.
+      </div>
+    </div>
+
+    <!-- Quote that hooked them -->
+    <div class="quote-block">
+      <div class="quote-text">"The constraint isn't talent, it's legacy thinking."</div>
+      <div class="quote-attribution">// most honest thing i've read in a job post in a while</div>
+    </div>
+
+    <!-- Closing -->
+    <div class="section-comment">// closing</div>
+
+    <div class="closing-text">
+      I'd like to be part of what you're building. You said you want people who build and ship. I build in public, I deploy to the real world, and the work is already out there. I'm right here.
+    </div>
+
+  </div>
+
+  <!-- Footer links -->
+  <div class="footer">
+    <div class="footer-label">// find_me_here</div>
+    <div class="links-grid">
+      <a href="https://www.linkedin.com/in/rdudhat-iitbhilai" class="link-chip">
+        <span class="link-icon">🔗</span> LinkedIn
+      </a>
+      <a href="https://rudradudhat2509.github.io" class="link-chip">
+        <span class="link-icon">🌐</span> Portfolio
+      </a>
+      <a href="https://github.com/RudraDudhat2509" class="link-chip">
+        <span class="link-icon">⌥</span> GitHub
+      </a>
+      <a href="https://x.com/rudrabuilds" class="link-chip">
+        <span class="link-icon">✕</span> @rudrabuilds
+      </a>
+    </div>
+
+    <div class="sender-row">
+      <div class="sender-avatar">R</div>
+      <div class="sender-info">
+        <span class="sender-name">Rudra Dudhat</span>
+        <span class="sender-handle">B24DS506 · IIT Bhilai · @rudrabuilds</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
